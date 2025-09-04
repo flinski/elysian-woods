@@ -1,1 +1,26 @@
 @import 'tailwindcss';
+
+@layer base {
+	:root {
+		--font-family:
+			'Inter', system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji',
+			'Segoe UI Emoji';
+	}
+
+	body {
+		font-family: var(--font-family);
+		font-size: 1rem;
+		font-weight: 400;
+		line-height: 1.5;
+		color: var(--color-stone-950);
+		background-color: var(--color-stone-200);
+	}
+}
+
+@utility nav-link {
+	@apply flex items-center gap-2 rounded-lg px-3 py-2 text-stone-500 hover:bg-stone-100 hover:text-stone-950;
+}
+
+@utility nav-link-active {
+	@apply nav-link bg-green-200 font-medium text-stone-950 hover:bg-green-200;
+}
