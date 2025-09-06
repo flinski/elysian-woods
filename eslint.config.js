@@ -6,6 +6,7 @@ import tseslint from 'typescript-eslint'
 import { globalIgnores } from 'eslint/config'
 import eslintConfigPrettier from 'eslint-config-prettier/flat'
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
+import pluginQuery from '@tanstack/eslint-plugin-query'
 
 export default tseslint.config([
 	globalIgnores(['dist']),
@@ -24,4 +25,5 @@ export default tseslint.config([
 	},
 	eslintConfigPrettier,
 	eslintPluginPrettierRecommended,
+	...pluginQuery.configs['flat/recommended'],
 ])
