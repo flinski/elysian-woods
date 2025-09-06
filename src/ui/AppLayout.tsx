@@ -3,6 +3,7 @@ import { Outlet } from 'react-router'
 import Header from '@/ui/Header'
 import Sidebar from '@/ui/Sidebar'
 import Main from '@/ui/Main'
+import Container from '@/ui/Container'
 
 export default function AppLayout() {
 	return (
@@ -10,7 +11,9 @@ export default function AppLayout() {
 			<Header />
 			<Sidebar />
 			<Main>
-				<Outlet />
+				<Container>
+					<Outlet />
+				</Container>
 			</Main>
 		</div>
 	)
