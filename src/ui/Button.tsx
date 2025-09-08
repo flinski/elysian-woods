@@ -4,9 +4,10 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 }
 
 export default function Button({ children, variation = 'primary', ...props }: ButtonProps) {
-	const primaryStyles = 'text-brown-50 bg-brown-500 py-2 px-4 rounded-sm cursor-pointer font-medium'
+	const primaryStyles =
+		'text-matcha-50 bg-matcha-500 py-2 px-4 rounded-sm cursor-pointer font-medium disabled:opacity-50 border-1 border-transparent'
 	const secondaryStyles =
-		' bg-stone-100 py-2 px-4 rounded-sm cursor-pointer border-1 border-stone-200'
+		' bg-stone-100 py-2 px-4 rounded-sm cursor-pointer border-1 border-stone-200 disabled:opacity-50'
 	const dangerStyles = ''
 
 	const styles =

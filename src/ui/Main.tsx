@@ -3,5 +3,5 @@ type MainProps = {
 }
 
 export default function Main({ children }: MainProps) {
-	return <main className="bg-stone-100 px-12 pt-10 pb-16">{children}</main>
+	return <main className="overflow-auto bg-stone-100 px-12 pt-10 pb-16">{children}</main>
 }
