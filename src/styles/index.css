@@ -22,5 +22,31 @@
 }
 
 @utility nav-link-active {
-	@apply nav-link bg-green-200 font-medium text-stone-950 hover:bg-green-200;
+	@apply nav-link bg-brown-200 text-brown-900 hover:bg-brown-200 hover:text-brown-900 font-medium;
+}
+
+@theme {
+	--color-brown-50: #f8f4ee;
+	--color-brown-100: #eee3d3;
+	--color-brown-200: #dfc8a9;
+	--color-brown-300: #cda477;
+	--color-brown-400: #c49162;
+	--color-brown-500: #af7143;
+	--color-brown-600: #965a38;
+	--color-brown-700: #784430;
+	--color-brown-800: #66392d;
+	--color-brown-900: #58322b;
+	--color-brown-950: #321916;
+
+	--color-matcha-50: #f4f6ef;
+	--color-matcha-100: #e7ecdb;
+	--color-matcha-200: #d2dabc;
+	--color-matcha-300: #b4c393;
+	--color-matcha-400: #98ab70;
+	--color-matcha-500: #869d5a;
+	--color-matcha-600: #5f713f;
+	--color-matcha-700: #4a5833;
+	--color-matcha-800: #3d472d;
+	--color-matcha-900: #353e29;
+	--color-matcha-950: #1b2013;
 }

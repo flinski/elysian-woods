@@ -35,7 +35,7 @@ export default function CabinRow({ cabin }: CabinRowProps) {
 			<div>{name}</div>
 			<div className="">Fits up to {maxCapacity} guests</div>
 			<div>{formatCurrency(regularPrice)}</div>
-			<div className="text-green-600">{formatCurrency(discount)}</div>
+			<div className="text-matcha-500 font-medium">{formatCurrency(discount)}</div>
 			<button
 				onClick={() => mutate(id)}
 				disabled={isPending}
