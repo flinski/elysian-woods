@@ -12,7 +12,7 @@ type CabinData = {
 	regularPrice: string
 	discount: string
 	description: string
-	imageUrl: string
+	imageUrl: FileList
 }
 
 export default function CreateCabinForm() {
@@ -47,6 +47,7 @@ export default function CreateCabinForm() {
 			maxCapacity: Number(data.maxCapacity),
 			regularPrice: Number(data.regularPrice),
 			discount: Number(data.discount),
+			imageUrl: data.imageUrl[0],
 		}
 
 		mutate(newCabin)
@@ -57,7 +58,10 @@ export default function CreateCabinForm() {
 	// }
 
 	return (
-		<form onSubmit={handleSubmit(onSubmit)} className="bg-stone-50 p-6">
+		<form
+			onSubmit={handleSubmit(onSubmit)}
+			className="rounded-md border-1 border-stone-200 bg-stone-50 p-6"
+		>
 			<div className={rowStyles}>
 				<label htmlFor="name" className={labelStyles}>
 					Cabin name
@@ -158,13 +162,17 @@ export default function CreateCabinForm() {
 					type="file"
 					id="image"
 					accept="image/*"
+					{...register('imageUrl', {
+						required: 'This field is required',
+					})}
 					disabled={isPending}
-					className={inputStyles}
+					className="file:bg-matcha-400 file:text-matcha-50 hover:file:bg-matcha-500 w-full cursor-pointer file:cursor-pointer file:rounded-sm file:border-1 file:border-transparent file:px-3 file:py-2 file:font-medium disabled:opacity-50"
 				/>
+				{errors.imageUrl?.message && <FormError>{errors.imageUrl.message}</FormError>}
 			</div>
 
 			<div className="flex justify-end gap-x-3">
-				<Button variation="secondary" type="reset">
+				<Button variation="secondary" type="reset" disabled={isPending}>
 					Cancel
 				</Button>
 				<Button disabled={isPending}>{isPending ? 'Creating...' : 'Add cabin'}</Button>
