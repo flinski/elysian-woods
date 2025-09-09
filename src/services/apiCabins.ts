@@ -17,7 +17,7 @@ export type NewCabin = {
 	regularPrice: number
 	discount: number
 	description: string
-	imageUrl: File
+	imageUrl: File | string
 }
 
 export async function getCabins() {
@@ -33,15 +33,34 @@ export async function getCabins() {
 	return cabins
 }
 
-export async function createCabin(newCabin: NewCabin) {
+export async function createEditCabin(newCabin: NewCabin, id?: string) {
+	const hasImagePath = typeof newCabin.imageUrl === 'string'
 	const randomId = Math.random().toString().slice(2)
-	const imageName = `${randomId}-${newCabin.imageUrl.name}`.replaceAll('/', '')
-	const imagePath = `${supabaseUrl}/storage/v1/object/public/cabin-images/${imageName}`
+	const imageName =
+		`${randomId}-${typeof newCabin.imageUrl === 'string' ? '' : newCabin.imageUrl.name}`.replaceAll(
+			'/',
+			''
+		)
+	const imagePath = hasImagePath
+		? newCabin.imageUrl
+		: `${supabaseUrl}/storage/v1/object/public/cabin-images/${imageName}`
 
-	const { data, error } = await supabase
-		.from('cabins')
-		.insert([{ ...newCabin, imageUrl: imagePath }])
-		.select()
+	let query
+
+	if (!id) {
+		query = supabase.from('cabins').insert([{ ...newCabin, imageUrl: imagePath }])
+	}
+
+	if (id) {
+		query = supabase
+			.from('cabins')
+			.update({ ...newCabin, imageUrl: imagePath })
+			.eq('id', id)
+			.select()
+	}
+
+	// @ts-expect-error no undefined
+	const { data, error } = await query.select().single()
 
 	if (error) {
 		console.error(error)

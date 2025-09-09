@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm, type SubmitHandler } from 'react-hook-form'
 import toast from 'react-hot-toast'
 
-import { createCabin } from '@/services/apiCabins'
+import { createEditCabin, type Cabin, type NewCabin } from '@/services/apiCabins'
 import Button from '@/ui/Button'
 import FormError from '@/ui/FormError'
 
@@ -12,22 +12,37 @@ type CabinData = {
 	regularPrice: string
 	discount: string
 	description: string
-	imageUrl: FileList
+	imageUrl: FileList | string
 }
 
-export default function CreateCabinForm() {
+type CreateCabinFormProps = {
+	cabinToEdit?: Cabin
+}
+
+export default function CreateCabinForm({ cabinToEdit }: CreateCabinFormProps) {
 	const {
 		register,
 		handleSubmit,
 		reset,
 		getValues,
 		formState: { errors },
-	} = useForm<CabinData>()
+	} = useForm<CabinData>({
+		defaultValues: cabinToEdit
+			? {
+					name: cabinToEdit.name,
+					maxCapacity: String(cabinToEdit.maxCapacity),
+					regularPrice: String(cabinToEdit.regularPrice),
+					discount: String(cabinToEdit.discount),
+					description: cabinToEdit.description,
+					imageUrl: cabinToEdit.imageUrl,
+				}
+			: {},
+	})
 	const queryClient = useQueryClient()
-	const { isPending, mutate } = useMutation({
-		mutationFn: createCabin,
+	const { isPending: isCreating, mutate: createCabin } = useMutation({
+		mutationFn: createEditCabin,
 		onSuccess: () => {
-			toast.success('Cabin successfully created')
+			toast.success('New cabin successfully created')
 			queryClient.invalidateQueries({ queryKey: ['cabins'] })
 			reset()
 		},
@@ -36,21 +51,41 @@ export default function CreateCabinForm() {
 		},
 	})
 
+	const { isPending: isEditing, mutate: editCabin } = useMutation({
+		mutationFn: ({ newCabin, id }: { newCabin: NewCabin; id: string }) =>
+			createEditCabin(newCabin, id),
+		onSuccess: () => {
+			toast.success('Cabin successfully edited')
+			queryClient.invalidateQueries({ queryKey: ['cabins'] })
+			reset()
+		},
+		onError: (error) => {
+			toast.error(`An error has occurred: ${error.message}`)
+		},
+	})
+
+	const isWorking = isCreating || isEditing
+
 	const rowStyles = 'grid grid-cols-[1fr_0.8fr_1fr] border-b-1 border-stone-100 items-center gap-6'
 	const labelStyles = 'font-semibold'
 	const inputStyles =
 		'border-1 border-stone-200 rounded-sm my-3 px-3 py-2 focus:outline-matcha-500 disabled:opacity-50'
 
 	const onSubmit: SubmitHandler<CabinData> = (data) => {
+		const image = typeof data.imageUrl === 'string' ? data.imageUrl : data.imageUrl[0]
 		const newCabin = {
 			...data,
 			maxCapacity: Number(data.maxCapacity),
 			regularPrice: Number(data.regularPrice),
 			discount: Number(data.discount),
-			imageUrl: data.imageUrl[0],
+			imageUrl: image,
 		}
 
-		mutate(newCabin)
+		if (cabinToEdit) {
+			editCabin({ newCabin, id: cabinToEdit.id })
+		} else {
+			createCabin(newCabin)
+		}
 	}
 
 	// const onError = (errors) => {
@@ -72,7 +107,7 @@ export default function CreateCabinForm() {
 					{...register('name', {
 						required: 'This field is required',
 					})}
-					disabled={isPending}
+					disabled={isWorking}
 					className={inputStyles}
 				/>
 				{errors.name?.message && <FormError>{errors.name.message}</FormError>}
@@ -92,7 +127,7 @@ export default function CreateCabinForm() {
 							message: 'Capacity should be at least 1',
 						},
 					})}
-					disabled={isPending}
+					disabled={isWorking}
 					className={inputStyles}
 				/>
 				{errors.maxCapacity?.message && <FormError>{errors.maxCapacity.message}</FormError>}
@@ -112,7 +147,7 @@ export default function CreateCabinForm() {
 							message: 'Price should be at least 1',
 						},
 					})}
-					disabled={isPending}
+					disabled={isWorking}
 					className={inputStyles}
 				/>
 				{errors.regularPrice?.message && <FormError>{errors.regularPrice.message}</FormError>}
@@ -132,7 +167,7 @@ export default function CreateCabinForm() {
 							Number(value) <= Number(getValues().regularPrice) ||
 							'Discount should be less than regular price',
 					})}
-					disabled={isPending}
+					disabled={isWorking}
 					className={inputStyles}
 				/>
 				{errors.discount?.message && <FormError>{errors.discount.message}</FormError>}
@@ -148,7 +183,7 @@ export default function CreateCabinForm() {
 					{...register('description', {
 						required: 'This field is required',
 					})}
-					disabled={isPending}
+					disabled={isWorking}
 					className={inputStyles}
 				/>
 				{errors.description?.message && <FormError>{errors.description.message}</FormError>}
@@ -163,19 +198,27 @@ export default function CreateCabinForm() {
 					id="image"
 					accept="image/*"
 					{...register('imageUrl', {
-						required: 'This field is required',
+						required: cabinToEdit ? false : 'This field is required',
 					})}
-					disabled={isPending}
+					disabled={isWorking}
 					className="file:bg-matcha-400 file:text-matcha-50 hover:file:bg-matcha-500 w-full cursor-pointer file:cursor-pointer file:rounded-sm file:border-1 file:border-transparent file:px-3 file:py-2 file:font-medium disabled:opacity-50"
 				/>
 				{errors.imageUrl?.message && <FormError>{errors.imageUrl.message}</FormError>}
 			</div>
 
 			<div className="flex justify-end gap-x-3">
-				<Button variation="secondary" type="reset" disabled={isPending}>
+				<Button variation="secondary" type="reset" disabled={isWorking}>
 					Cancel
 				</Button>
-				<Button disabled={isPending}>{isPending ? 'Creating...' : 'Add cabin'}</Button>
+				<Button disabled={isWorking}>
+					{isCreating
+						? 'Creating...'
+						: isEditing
+							? 'Editing...'
+							: cabinToEdit
+								? 'Edit cabin'
+								: 'Add cabin'}
+				</Button>
 			</div>
 		</form>
 	)
