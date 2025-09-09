@@ -1,14 +1,13 @@
-import { useQuery } from '@tanstack/react-query'
-import { getCabins } from '@/services/apiCabins'
-
+import { useCabins } from '@/features/cabins/useCabins'
 import CabinRow from '@/features/cabins/CabinRow'
+
 import Spinner from '@/ui/Spinner'
 import ErrorMessage from '@/ui/ErrorMessage'
 import Table from '@/ui/Table'
 import TableHeader from '@/ui/TableHeader'
 
 export default function CabinTable() {
-	const { isPending, error, data: cabins } = useQuery({ queryKey: ['cabins'], queryFn: getCabins })
+	const { isPending, error, cabins } = useCabins()
 
 	if (isPending) {
 		return <Spinner />
@@ -16,6 +15,10 @@ export default function CabinTable() {
 
 	if (error) {
 		return <ErrorMessage message={error.message} />
+	}
+
+	if (!cabins) {
+		return <ErrorMessage message="No cabins data available" />
 	}
 
 	return (

@@ -62,9 +62,15 @@ export async function createEditCabin(newCabin: NewCabin, id?: string) {
 	// @ts-expect-error no undefined
 	const { data, error } = await query.select().single()
 
+	const cabins: Cabin[] = data
+
 	if (error) {
 		console.error(error)
 		throw new Error('Cabin could not be created')
+	}
+
+	if (hasImagePath) {
+		return cabins
 	}
 
 	const { error: storageError } = await supabase.storage
@@ -76,8 +82,6 @@ export async function createEditCabin(newCabin: NewCabin, id?: string) {
 		console.error(storageError)
 		throw new Error('Cabin image could not be uploaded and the cabin was not created')
 	}
-
-	const cabins: Cabin[] = data
 
 	return cabins
 }

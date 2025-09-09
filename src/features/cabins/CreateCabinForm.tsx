@@ -1,8 +1,10 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm, type SubmitHandler } from 'react-hook-form'
-import toast from 'react-hot-toast'
 
-import { createEditCabin, type Cabin, type NewCabin } from '@/services/apiCabins'
+import { type Cabin } from '@/services/apiCabins'
+
+import { useCreateCabin } from '@/features/cabins/useCreateCabin'
+import { useEditCabin } from '@/features/cabins/useEditCabin'
+
 import Button from '@/ui/Button'
 import FormError from '@/ui/FormError'
 
@@ -38,31 +40,8 @@ export default function CreateCabinForm({ cabinToEdit }: CreateCabinFormProps) {
 				}
 			: {},
 	})
-	const queryClient = useQueryClient()
-	const { isPending: isCreating, mutate: createCabin } = useMutation({
-		mutationFn: createEditCabin,
-		onSuccess: () => {
-			toast.success('New cabin successfully created')
-			queryClient.invalidateQueries({ queryKey: ['cabins'] })
-			reset()
-		},
-		onError: (error) => {
-			toast.error(`An error has occurred: ${error.message}`)
-		},
-	})
-
-	const { isPending: isEditing, mutate: editCabin } = useMutation({
-		mutationFn: ({ newCabin, id }: { newCabin: NewCabin; id: string }) =>
-			createEditCabin(newCabin, id),
-		onSuccess: () => {
-			toast.success('Cabin successfully edited')
-			queryClient.invalidateQueries({ queryKey: ['cabins'] })
-			reset()
-		},
-		onError: (error) => {
-			toast.error(`An error has occurred: ${error.message}`)
-		},
-	})
+	const { isCreating, createCabin } = useCreateCabin()
+	const { isEditing, editCabin } = useEditCabin()
 
 	const isWorking = isCreating || isEditing
 
@@ -82,9 +61,16 @@ export default function CreateCabinForm({ cabinToEdit }: CreateCabinFormProps) {
 		}
 
 		if (cabinToEdit) {
-			editCabin({ newCabin, id: cabinToEdit.id })
+			editCabin(
+				{ newCabin, id: cabinToEdit.id },
+				{
+					onSuccess: () => reset(),
+				}
+			)
 		} else {
-			createCabin(newCabin)
+			createCabin(newCabin, {
+				onSuccess: () => reset(),
+			})
 		}
 	}
 

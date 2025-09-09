@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import toast from 'react-hot-toast'
+import { Copy, Pencil, Trash } from 'lucide-react'
 
-import { deleteCabin, type Cabin } from '@/services/apiCabins'
+import { type Cabin } from '@/services/apiCabins'
 import { formatCurrency } from '@/utils/helpers'
 
+import { useDeleteCabin } from '@/features/cabins/useDeleteCabin'
+import { useCreateCabin } from '@/features/cabins/useCreateCabin'
 import CreateCabinForm from '@/features/cabins/CreateCabinForm'
 
 type CabinRowProps = {
@@ -13,20 +14,21 @@ type CabinRowProps = {
 
 export default function CabinRow({ cabin }: CabinRowProps) {
 	const [showForm, setShowForm] = useState(false)
+	const { isDeleting, deleteCabin } = useDeleteCabin()
+	const { isCreating, createCabin } = useCreateCabin()
 
-	const queryClient = useQueryClient()
-	const { isPending, mutate } = useMutation({
-		mutationFn: deleteCabin,
-		onSuccess: () => {
-			toast.success('Cabin successfully deleted')
-			queryClient.invalidateQueries({ queryKey: ['cabins'] })
-		},
-		onError: (error) => {
-			toast.error(`An error has occurred: ${error.message}`)
-		},
-	})
+	const { id, name, maxCapacity, regularPrice, discount, description, imageUrl } = cabin
 
-	const { id, name, maxCapacity, regularPrice, discount, imageUrl, description } = cabin
+	const handleDuplicate = () => {
+		createCabin({
+			name: `Copy of ${name}`,
+			maxCapacity,
+			regularPrice,
+			discount,
+			description,
+			imageUrl,
+		})
+	}
 
 	return (
 		<>
@@ -41,21 +43,32 @@ export default function CabinRow({ cabin }: CabinRowProps) {
 				<div>{name}</div>
 				<div className="">Fits up to {maxCapacity} guests</div>
 				<div>{formatCurrency(regularPrice)}</div>
-				<div className="text-matcha-500 font-medium">{formatCurrency(discount)}</div>
-				<div>
+				{discount ? (
+					<div className="text-matcha-500 font-medium">{formatCurrency(discount)}</div>
+				) : (
+					<div>&mdash;</div>
+				)}
+				<div className="flex items-center">
 					<button
-						onClick={() => setShowForm((show) => !show)}
-						disabled={isPending}
-						className="hover: cursor-pointer rounded-sm border-1 border-stone-200 bg-stone-100 px-3 py-2 hover:border-amber-200 hover:bg-amber-100 disabled:opacity-50"
+						onClick={handleDuplicate}
+						disabled={isDeleting || isCreating}
+						className="flex size-8 cursor-pointer items-center justify-center rounded-sm border-1 border-stone-200 bg-stone-100 hover:border-blue-200 hover:bg-blue-100 disabled:opacity-50"
 					>
-						Edit
+						<Copy size={20} />
 					</button>
 					<button
-						onClick={() => mutate(id)}
-						disabled={isPending}
-						className="hover: cursor-pointer rounded-sm border-1 border-stone-200 bg-stone-100 px-3 py-2 hover:border-red-200 hover:bg-red-100 disabled:opacity-50"
+						onClick={() => setShowForm((show) => !show)}
+						disabled={isDeleting || isCreating}
+						className="flex size-8 cursor-pointer items-center justify-center rounded-sm border-1 border-stone-200 bg-stone-100 hover:border-amber-200 hover:bg-amber-100 disabled:opacity-50"
 					>
-						{isPending ? 'Deleting...' : 'Delete'}
+						<Pencil size={20} />
+					</button>
+					<button
+						onClick={() => deleteCabin(id)}
+						disabled={isDeleting || isCreating}
+						className="flex size-8 cursor-pointer items-center justify-center rounded-sm border-1 border-stone-200 bg-stone-100 hover:border-red-200 hover:bg-red-100 disabled:opacity-50"
+					>
+						<Trash size={20} />
 					</button>
 				</div>
 			</div>
