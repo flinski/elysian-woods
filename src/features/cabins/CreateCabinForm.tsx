@@ -19,9 +19,10 @@ type CabinData = {
 
 type CreateCabinFormProps = {
 	cabinToEdit?: Cabin
+	onCloseModal?: () => void
 }
 
-export default function CreateCabinForm({ cabinToEdit }: CreateCabinFormProps) {
+export default function CreateCabinForm({ cabinToEdit, onCloseModal }: CreateCabinFormProps) {
 	const {
 		register,
 		handleSubmit,
@@ -64,12 +65,18 @@ export default function CreateCabinForm({ cabinToEdit }: CreateCabinFormProps) {
 			editCabin(
 				{ newCabin, id: cabinToEdit.id },
 				{
-					onSuccess: () => reset(),
+					onSuccess: () => {
+						reset()
+						onCloseModal?.()
+					},
 				}
 			)
 		} else {
 			createCabin(newCabin, {
-				onSuccess: () => reset(),
+				onSuccess: () => {
+					reset()
+					onCloseModal?.()
+				},
 			})
 		}
 	}
@@ -79,10 +86,7 @@ export default function CreateCabinForm({ cabinToEdit }: CreateCabinFormProps) {
 	// }
 
 	return (
-		<form
-			onSubmit={handleSubmit(onSubmit)}
-			className="rounded-md border-1 border-stone-200 bg-stone-50 p-6"
-		>
+		<form onSubmit={handleSubmit(onSubmit)} className="rounded-md bg-stone-50 p-6">
 			<div className={rowStyles}>
 				<label htmlFor="name" className={labelStyles}>
 					Cabin name
@@ -193,7 +197,12 @@ export default function CreateCabinForm({ cabinToEdit }: CreateCabinFormProps) {
 			</div>
 
 			<div className="flex justify-end gap-x-3">
-				<Button variation="secondary" type="reset" disabled={isWorking}>
+				<Button
+					variation="secondary"
+					type="reset"
+					disabled={isWorking}
+					onClick={() => onCloseModal?.()}
+				>
 					Cancel
 				</Button>
 				<Button disabled={isWorking}>

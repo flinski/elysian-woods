@@ -49,4 +49,6 @@
 	--color-matcha-800: #3d472d;
 	--color-matcha-900: #353e29;
 	--color-matcha-950: #1b2013;
+
+	--color-backdrop: hsl(0deg 0% 0% / 10%);
 }
